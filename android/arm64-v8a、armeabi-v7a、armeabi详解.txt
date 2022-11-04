@@ -1,0 +1,85 @@
+{
+	AndroidABI
+	支持的ABI
+	架构介绍
+	ABI是如何工作的
+	ABI具体适配流程
+}
+
+AndroidABI
+	bookmark_border不同的 Android 设备使用不同的 CPU,而不同的 CPU 支持不同的指令集。CPU 与指令集的每种组合都有专属的应用二进制接口 (ABI)。ABI 包含以下信息:
+
+	可使用的 CPU 指令集(和扩展指令集)。
+	运行时内存存储和加载的字节顺序。Android 始终是 little-endian。
+	在应用和系统之间传递数据的规范(包括对齐限制),以及系统调用函数时如何使用堆栈和寄存器。
+	可执行二进制文件(例如程序和共享库)的格式,以及它们支持的内容类型。Android 始终使用 ELF。如需了解详情,请参阅 ELF System V 应用二进制接口。
+	如何重整 C++ 名称。如需了解详情,请参阅 Generic/Itanium C++ ABI。
+	本页列举了 NDK 支持的 ABI,并且介绍了每个 ABI 的运行原理。
+
+	ABI 还可以指平台支持的原生 API。如需影响 32 位系统的此类 ABI 问题列表,请参阅 32 位 ABI 错误。
+
+	谷歌链接:https://developer.android.com/ndk/guides/abis
+
+支持的ABI
+	ABI	支持的指令集	备注
+	armeabi-v7a: armeabi,Thumb-2,VFPv3-D16 与ARMv5/v6 设备不兼容。
+		此 ABI 适用于基于 32 位 ARM 的 CPU。Android 变体包含 Thumb-2 和 VFP 硬件浮点指令(具体而言就是 VFPv3-D16),其中包含 16 个专用 64 位浮点寄存器。
+
+		如需详细了解 ABI 中并非特定于 Android 的部分,请参阅 ARM 架构的应用二进制接口 (ABI)
+
+		默认情况下,NDK 构建系统会生成 Thumb-2 代码,除非您在 Android.mk 中针对 ndk-build 使用 LOCAL_ARM_MODE,或在配置 CMake 时使用 ANDROID_ARM_MODE。
+
+		包括高级 SIMD (Neon) 和 VFPv3-D32 在内的其他扩展程序都是可选的。如需了解详情,请参阅 Neon 支持。
+
+		armeabi-v7a ABI 使用 -mfloat-abi=softfp 来强制实施以下规则:虽然系统可以执行浮点代码,但编译器在调用函数时必须传递整数寄存器中的所有 float 值以及整数寄存器对中的所有 double 值。
+
+	arm64-v8a: AArch64
+		此 ABI 适用于基于 ARMv8-A 的 CPU,支持 64 位 AArch64 架构。它包含高级 SIMD (Neon) 架构扩展指令集。
+
+		您可以在 C 和 C++ 代码中使用 Neon 内建函数来充分利用高级 SIMD 扩展指令集。针对 Armv8-A 的 Neon 程序员指南详细介绍了 Neon 内建函数和 Neon 编程的概况。
+
+		如需了解 ABI 中并非特定于 Android 的部分的完整详情,请参阅 Arm 的了解架构。Arm 还针对64 位 Android 开发提供了一些移植方面的建议。
+
+		在 Android 中,特定于平台的 x18 寄存器专用于 ShadowCallStack,不应由您的代码使用。当前的 Clang 版本默认使用 Android 中的 -ffixed-x18 选项,因此除非您使用的是手写编译器(或非常旧的编译器),否则无需担心这一点。
+
+	x86: x86 (IA-32) MMX SSE/2/3 SSSE3 不支持 MOVBE 或 SSE4。
+		此 ABI 适用于支持通常称为“x86”、“i386”或“IA-32”的指令集的 CPU。此 ABI 的特性包括:
+		指令一般由具有编译器标志的 GCC 生成,如下所示:-march=i686 -mtune=intel -mssse3 -mfpmath=sse -m32
+
+	x86_64: x86-64 MMX SSE/2/3 SSSE3 SSE4.1、4.2 POPCNT
+		此 ABI 适用于支持通常称为“x86-64”的指令集的 CPU。它支持 GCC 通常使用以下编译器标志生成的指令:-march=x86-64 -msse4.2 -mpopcnt -m64 -mtune=intel
+
+架构介绍
+	早期的Android系统几乎只支持ARMv5的CPU架构,后面发展到支持七种不同的CPU架构:ARMv5,ARMv7 (从2010年起),x86 (从2011年起),MIPS (从2012年起),ARMv8,MIPS64和x86_64 (从2014年起),每一种都关联着一个相应的ABI(Application Binary Interface)。
+
+	应用程序二进制接口(Application Binary Interface)定义了二进制文件(尤其是.so文件)如何运行在相应的系统平台上,从使用的指令集,内存对齐到可用的系统函数库。
+
+	在Android 系统上,每一个CPU架构对应一个ABI:armeabi,armeabi-v7a,x86,mips,arm64- v8a,mips64,x86_64。
+	但是最新的谷歌官方文档已经把mips和armv5移除了,如图所示:
+
+	• x86 / x86_64: x86 架构的手机都会包含由 Intel 提供的称为 Houdini 的指令集动态转码工具,实现 对 arm .so 的兼容,再考虑 x86 1% 以下的市场占有率,x86 相关的两个 .so 也是可以忽略的
+	• armeabi: ARM v5 这是相当老旧的一个版本,缺少对浮点数计算的硬件支持,在需要大量计算时有性能瓶颈
+	• armeabi-v7a: ARM v7
+	• arm64-v8a: 64位支持,目前主流的版本,虽然网上很多博客都说v7是主流版本,但是我亲自试验了很多手机,都是arm64-v8a的架构,测试机型包括小米5-小米9,华为P30,华为mate10,魅蓝2等均是v8架构
+
+	查询手机cpu命令行:
+		adb shell getprop ro.product.cpu.abi
+
+ABI是如何工作的
+	2020.06更新, 看到一篇很好的文章搬过来了,感谢原作者(https://juejin.cn/post/6844904148589084680)
+	官方文档解释如下:
+	Android 系统在运行时知道它支持哪些 ABI,因为版本特定的系统属性会指示:
+
+	设备的主要 ABI,与系统映像本身使用的机器代码对应。(可选)与系统映像也支持的其他 ABI 对应的辅助 ABI。此机制确保系统在安装时从软件包提取最佳机器代码。
+
+	为实现最佳性能,应直接针对主要 ABI 进行编译。例如,基于 ARMv5TE 的典型设备只会定义主 ABI:armeabi。相反,基于 ARMv7 的典型设备将主 ABI 定义为 armeabi-v7a,并将辅助 ABI 定义为 armeabi,因为它可以运行为每个 ABI 生成的应用原生二进制文件。
+	64 位设备也支持其 32 位变体。以 arm64-v8a 设备为例,该设备也可以运行 armeabi 和 armeabi-v7a 代码。但请注意,如果应用以 arm64-v8a 为目标,而非依赖于运行 armeabi-v7a 版应用的设备,则应用在 64 位设备上的性能要好得多。
+	许多基于 x86 的设备也可运行 armeabi-v7a 和 armeabi NDK 二进制文件。对于这些设备,主 ABI 将是 x86,辅助 ABI 是 armeabi-v7a。
+	总的来说,就是一个Android设备可以支持多种ABI,设备主ABI和辅助ABI,以arm64-v8a为主ABI的设备,辅助ABI为armeabi-v7a和armeabi,以armeabi-v7a为主ABI的设备,辅助ABI为armeabi。
+	另外,x86 架构的手机都会包含由 Intel 提供的称为 Houdini 的指令集动态转码工具,实现对 arm .so 的兼容,也就是说有适配armeabi平台的APP是可以跑在x86手机上的。
+
+
+ABI具体适配流程
+	对于一个cpu是arm64-v8a架构的手机,它运行app时,进入jnilibs去读取库文件时,先看有没有arm64-v8a文件夹,如果没有该文件夹,去找armeabi-v7a文件夹,如果没有,再去找armeabi文件夹,如果连这个文件夹也没有,就抛出异常；
+	如果有arm64-v8a文件夹,那么就去找特定名称的.so文件,注意:如果没有找到想要的.so文件,不会再往下(armeabi-v7a文件夹)找了,而是直接抛出异常。
+

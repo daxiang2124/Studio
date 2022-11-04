@@ -1,0 +1,50 @@
+Level 1：
+	搞懂基础的计算机图形学
+	搞懂软件工程、OOP
+	搞懂一门语言，c#，c++
+	搞懂光照模型
+	
+Level 2：
+	精通计算机图形学里一些数学，主要是线性代数
+	精通一门语言，c#，c++
+	能够优雅地用各种设计模式进行Coding
+	搞懂一种图形相关API，OpenGL、DirectX
+	学会一门Shading Language：GLSL，CG
+	精通各种光照模型
+	能根据美术要求把效果做好
+	搞懂渲染相关设计模式和算法
+	
+Level 3：
+	精通一种图形相关API，OpenGL、DirectX
+	精通一门Shading Language：GLSL，CG
+	会用各种显卡profile工具分析其他游戏
+	看到一个游戏的画面，能够通过目测马上分析出主要的drawcall pipeline和相关技术
+	精通渲染相关设计模式和算法
+	一般这个level的程序员或大多小写过一个自用的3D引擎
+	是团队的技术核心
+	
+Leve 4:
+	搞懂前沿图形学技术，经常看SIGGRAPH paper，并能自己动手实现一些算法
+	了解显卡机制，看得懂Nvidea的显卡白皮书，了解几种主要硬件的各自特性
+	搞懂Cuda，OpenCL，PhysiX，要了解机制，能很好应用
+	有丰富的工程经验
+	一般这个level的程序员应该担当过几个大型游戏项目主程，或者发过图形学相关paper
+	
+Level 5:
+	应该不需要，去做科研比较好以上是游戏开发的前端程序员/图形程序员职位的技能树，除此之外，根据不同的游戏类型，还有很多业务相关的技能，例如FPS、赛车游戏的场景加载、MMORPG的多人通信、赛车游戏的物理仿真、体育游戏的AI引擎......每一项展开都是值得花5-10年去精通的领域。
+	
+	
+	
+
+https://www.bilibili.com/video/BV1Kt411y7jN?from=search&seid=84920144913588800 	MIT线性代数
+https://space.bilibili.com/88461692?from=search&seid=18214111794022127741  可能是世界上最好的线性代数教程
+
+
+
+
+
+
+
+
+
+

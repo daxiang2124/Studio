@@ -1,0 +1,41 @@
+{
+	"ProjectValue": "Text_a",
+
+	"release":{
+		"bundleid":"com.org.syx",
+		"keystorePath":"azzz.jks",
+		"keystoreAlias":"bbb",
+		"keystorePassword":"cccc",
+		"keystoreAliasPassword":"eeee",
+
+		"libName":"bbb",
+		"ndkPath":"C:android-ndk-r22b",
+		"appAbi":"armeabi-v7a:arm64-v8a",
+		"libcocos2dx":"'E:/android/libcocos2dx'"
+	},
+
+	"debug":{
+		"bundleid":"com.org.syx",
+		"keystorePath":"azzz.jks",
+		"keystoreAlias":"bbb",
+		"keystorePassword":"cccc",
+		"keystoreAliasPassword":"eeee",
+
+		"libName":"bbb",
+		"ndkPath":"C:android-ndk-r22b",
+		"appAbi":"armeabi-v7a:arm64-v8a",
+		"libcocos2dx":"'E:/android/libcocos2dx'"
+	},
+
+	"luacompile_key": "aaaaa",
+	"luacompile_value": "bbbbb",
+	"paythonPath":"ccccccc",
+	
+	"packagingInfo":"zzzeebc[111,222,333]",
+	"packagingType":3,
+
+	"game_list":[
+	  {"name":"zzzz","des":"client/ce/zzzzz","ori":"zzzzz","folder":"zzzzz","zipped":"0","primode":"0"}
+	]
+   
+}

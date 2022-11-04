@@ -1,0 +1,97 @@
+{
+	makefile介绍
+	make安装
+}
+
+{Makefile介绍
+	Makefile构建工具,解决工程的配置文件
+
+	为什么会存在 Makefile？
+		Makefile 用于帮助大型程序的部分需要重新编译配置文件。在绝大多数情况下,编译 C/C++文件。其他语言通常有自己的工具,其用途与Make 相似。当您需要一系列指令来运行取决于哪些文件已更改时,Make也可以在编译之外使用。本教程将重点介绍C/C++编译用例。
+
+		这是您可以使用Make构建的示例依赖关系图。如果任何文件的依赖项发生更改,则该文件将被重新编译:
+
+	Make 有哪些替代方案？
+		流行的 C/C++ 替代构建系统是SCons、CMake、Bazel和Ninja。一些代码编辑器(如MicrosoftVisualStudio)有自己的内置构建工具。对于 Java,有Ant/Maven/Gradle。Go和Rust 等其他语言有自己的构建工具。
+
+		Python、Ruby 和 Javascript 等解释型语言不需要类似于 Makefile。Makefiles 的目标是根据已更改的文件来编译需要编译的任何文件。但是当解释语言中的文件发生变化时,不需要重新编译任何东西。当程序运行时,将使用该文件的最新版本。
+
+	CMake
+		GNU 的 Make ,QT 的 qmake ,微软的 MS nmake,BSD Make(pmake),Makepp,等等。这些 Make 工具遵循着不同的规范和标准,所执行的 Makefile 格式也千差万别。这样就带来了一个严峻的问题:如果软件想跨平台,必须要保证能够在不同平台编译。而如果使用上面的 Make 工具,就得为每一种标准写一次 Makefile ,这将是一件让人抓狂的工作。CMake 就是针对上面问题所设计的工具:它首先允许开发者编写一种平台无关的 CMakeList.txt 文件来定制整个编译流程,然后再根据目标用户的平台进一步生成所需的本地化 Makefile 和工程文件,如 Unix 的 Makefile 或 Windows 的 Visual Studio 工程。从而做到“Write once, run everywhere”。显然,CMake 是一个比上述几种 make 更高级的编译配置工具。一些使用 CMake 作为项目架构系统的知名开源项目有 VTK、ITK、KDE、OpenCV、OSG 等。在 linux 平台下使用 CMake 生成 Makefile 并编译的流程如下:
+
+			1.写 CMake 配置文件 CMakeLists.txt 。
+			2.执行命令 cmake PATH 或者 ccmake PATH 生成 Makefile(ccmake 和 cmake 的区别在于前者提供了一个交互式的界面)。其中, PATH 是 CMakeLists.txt 所在的目录。
+			3.使用 make 命令进行编译。
+
+	参考资料
+		https://makefiletutorial.com/ 学习Makefile用最美味的例子
+		https://seisman.github.io/how-to-write-makefile/index.html 跟我一起写Makefile
+		http://www.codebaoku.com/makefile/makefile-index.html 编程宝库 Makefile 教程
+}
+
+{make安装
+	Gitea 大量使用了 Make 工具来自动执行任务并改进开发,本文将介绍如何安装 Make。
+
+	Linux环境
+		可以使用包管理工具来安装 Make。
+
+		Ubuntu/Debian 环境,执行以下命令:
+			sudo apt-get install make
+		Fedora/RHEL/CentOS,执行以下命令:
+			sudo yum install make
+
+	Windows环境
+		GNU make:
+			将适合您系统的exe文件复制到某处并添加至环境变量PATH中
+			http://www.equation.com/servlet/equation.cmd?fa=make
+			命令:make -v
+
+		使用MinGW工具:
+			您同样需要将包含此文件的目录mingw32-make.exe添加到环境变量中。make.exe bin PATH
+			1、下载安装MinGW:
+				https://www.mingw-w64.org/
+				https://sourceforge.net/projects/mingw/
+			2、安装MinGW,选择Basic setup下选择mingw32-base包。
+			3、打开MinGW安装目录下的bin文件夹,将mingw32-make.exe重命名为make.exe。
+			4、设置环境变量,把bin文件夹的路径 C:\MinGW\bin 添加到用户变量。
+			5、查看make是否安装成功: 在cmd中输入 make -v。
+
+		通过巧克力安装:
+			执行choco install make命令智能。
+			https://community.chocolatey.org/packages/make
+
+		CMake:
+			https://cmake.org/download/
+			命令:cmake --help
+
+			https://github.com/wzpan/cmake-demo CMake入门实战
+			https://zhuanlan.zhihu.com/p/534439206 全网最细的CMake教程！
+}
+
+{第一个helloword
+
+	Makefile 文件由一系列规则(rules)构成。每条规则的形式如下:
+		<target> : <prerequisites> <prerequisites> ... #目标:前置条件
+		[tab]  <commands> #命令
+
+		target(是必需的不可省略)
+			可以是一个object file(目标文件),也可以是一个执行文件,还可以是一个标签(label)。对于标签这种特性,在后续的“伪目标”章节中会有叙述。
+		prerequisites
+			生成该target所依赖的文件和或target
+		command
+			该target要执行的命令(任意的shell命令)
+
+		目标(target):是必需的 不可省略
+		前置条件(prerequisites)和命令(command):都是可选的,但是两者之中必须至少存在一个。
+
+		每条规则(语句)就明确两件事:构建目标的前置条件是什么,以及如何构建。
+
+	code
+		HelloWorld.mk{
+			hello:
+				echo "Hello, World"
+		}
+		make -f HelloWorld.mk
+}
+
+

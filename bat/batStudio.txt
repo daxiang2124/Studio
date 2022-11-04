@@ -1,0 +1,209 @@
+{
+	变量(命令行参数,set命令,局部与全局变量,环境变量)
+	函数
+	文件(copy)
+	时间(date,time)
+}
+
+{
+	%%~ni 代表文件名
+	%%~xi 代表文件扩展名
+	%%~nxi 代表文件名和扩展名
+
+	set keystore='aa.jks'
+	set curdir=""
+	for %%i in (%keystore%) do (
+		set curdir=%%~xi
+	)
+	echo curdir=%curdir%
+
+}
+
+{变量(命令行参数,set命令,局部与全局变量,环境变量)
+	批处理文件中有两种类型的变量。 其中一个参数是在调用批处理文件时可以传递的参数，另一个是通过set命令完成的。
+	{
+		命令行参数:
+		set命令:
+		局部与全局变量:
+		环境变量:
+	}
+
+	命令行参数:
+		批处理脚本支持命令行参数的概念，其中参数可以在被调用时传递给批处理文件。参数可以通过变量%1，%2，%3等从批处理文件中调用。
+		以下示例显示了一个批处理文件，它接受3个命令行参数，并将它们回显到命令行屏幕。
+			code
+				test.bat{
+					@echo off
+					echo %1
+					echo %2
+					echo %3
+				}
+				Test.bat 1 2 3
+	set命令:
+		set /A variable-name=value
+			variable-name - 是想要设置的变量的名称。
+			value - 是需要根据变量设置的值。
+			/A - 如果该值本质上是数值，则使用此开关。
+
+
+		set message=Hello World 
+		echo %message%
+
+		使用数字值(加减乘除)
+			在批处理脚本中，也可以定义一个变量来保存一个数值。 这可以通过使用/A开关完成。以下代码显示了可以使用/A开关设置数值的一种简单方法。
+
+			set /A a=5
+			set /A b=10
+			echo a=%a% b=%b% +-*/
+			
+			set /A c=%a% + %b%
+			echo       a+b=%c%
+			set /A c=%a% - %b%
+			echo       a-b=%c%
+			set /A c=%b% / %a%
+			echo       a/b=%c%
+			set /A c=%b% * %a%
+			echo       a*b=%c%
+
+			输出
+				a=5 b=10 +-*/
+					a+b=15
+					a-b=-5
+					a/b=2
+					a*b=50
+			首先将2个变量a和b的值分别设置为5和10。相加这些值并存储在变量c中。最后，显示变量c的值。
+
+	局部与全局变量:
+		在任何编程语言中，都有一个选项可以将变量标记为具有某种范围，即可以访问它们的代码部分。 通常情况下，具有全局作用域的变量可以从程序中的任何地方访问，而局部作用域变量则有一个可以访问的定义的边界。
+
+		DOS脚本还定义了局部和全局范围的变量。 默认情况下，变量是整个命令提示符会话的全局变量。 调用SETLOCAL命令，使变量局部在脚本的范围内。 在调用SETLOCAL之后，任何变量赋值在调用ENDLOCAL，调用EXIT，或者当执行到达脚本中的文件结尾(EOF)时都会返回。 以下示例显示了在脚本中设置局部和全局变量时的差异。
+
+		code
+			set globalvar=5
+			SETLOCAL
+				set var=1
+				set /A var=%var% + 5
+				echo var=%var%
+				set /A globalvar=%globalvar% + %var%
+				echo globalvar=%globalvar%
+			ENDLOCAL
+			
+			echo var=%var%
+			echo globalvar=%globalvar%
+
+			输出
+				var=6
+				globalvar=11
+				var=
+				globalvar=5
+
+			'globalvar'是用全局范围定义的，在整个脚本中都是可用的。
+			var变量是在局部范围内定义的，因为它被包含在SETLOCAL和ENDLOCAL块之间。 因此，这个变量在执行'ENDLOCAL'语句后就会被销毁。
+
+	环境变量:
+		echo temp=%temp%
+
+		rem 设置用户环境变量
+		set CurrentPath=%~dp0
+		setx JAVA_HOME "%CurrentPath%jdk1.8.0_162"
+		setx path "%%JAVA_HOME%%\bin;%%JAVA_HOME%%\jre\bin;"
+
+		输出
+			temp=C:\***\AppData\Local\Temp
+
+}
+
+{函数
+	如下是一个最简单的函数写法；以:func开始以goto:eof结束。:func和goto:eof之间的为函数内容，例如这里的echo this is a bat func
+
+	语法
+		:函数名字
+			...
+			goto:eof
+	调用
+		call:函数名字
+
+	函数返回值
+		两种方法:
+			参数带回
+			全局变量带回
+
+
+	code 函数调用
+		@echo off
+		set abc=12
+		call:FUNCTIONARGS_RETURN %abc% 22
+		pause
+		exit
+
+		:FUNCTIONARGS_RETURN
+			echo myFuncReturnValue First para:%1
+			echo myFuncReturnValue Second para:%2
+			goto:eof
+
+	code 函数返回值(参数带回)
+		@echo off
+		set value1=1
+		set value2=2
+		echo value1=%value1%
+		echo value2=%value2%
+		call:SetValue value1,value2
+		echo value1=%value1%
+		echo value2=%value2%
+
+		pause
+		exit
+
+		:SetValue
+			set "%~1=5"
+			set "%~2=10"
+			goto:eof
+
+		输出
+			value1=1
+			value2=2
+			value1=5
+			value2=10
+
+}
+
+{文件(copy)
+	
+
+
+}
+
+{时间(date,time)
+	echo ---------------date-----------------
+	echo date=%date%
+	echo date04=%date:~0,4%
+	echo date52=%date:~5,2%
+	echo date82=%date:~8,2%
+
+	echo ---------------time-----------------
+	echo time=%time%
+	echo time02=%time:~0,2%
+	echo time32=%time:~3,2%
+	echo time68=%time:~6,2%
+	echo time82=%time:~9,2%
+
+	echo ---------------folder-----------------
+	set folder=%date:~0,4%-%date:~5,2%-%date:~8,2%-%time:~0,2%%time:~3,2%-%time:~6,2%%time:~9,2%
+	echo folder=%folder%
+
+
+	---------------date-----------------
+	date=2007/01/20 周四
+	date04=2007
+	date52=01
+	date82=20
+	---------------time-----------------
+	time=20:30:22.87
+	time02=20
+	time32=30
+	time68=22
+	time82=87
+	---------------folder-----------------
+	folder=2007-01-20-2030-2287
+
+}

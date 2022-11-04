@@ -1,0 +1,617 @@
+jarsigner 命令
+   Name
+   概要
+   描述
+   密钥库别名
+   密钥库位置
+   密钥库实现
+   支持的算法
+   签名的 JAR 文件
+   签名文件
+   签名块文件
+   签名时间戳
+   JAR 文件验证
+   JAR 文件的多重签名
+   jarsigner 的选项
+   不推荐使用的选项
+   错误和警告
+   失败
+   严重警告
+   信息警告
+   签署 JAR 文件的示例
+   验证签名 JAR 文件的示例
+   使用证书信息进行验证的示例
+
+Name
+jarsigner - 签署和验证 Java 归档 (JAR) 文件
+
+概要
+jarsigner[选项] jar 文件 别名
+
+jarsigner -verify[选项] jar 文件[别名...]
+
+选项
+命令行选项。请参阅jarsigner 的选项。
+-verify
+该-verify选项可以在 JAR 文件名之后采用零个或多个密钥库别名。指定该-verify选项后,该jarsigner命令会检查用于验证 JAR 文件中每个签名条目的证书是否与密钥库别名之一匹配。别名在由指定的密钥库-keystore或默认密钥库中定义。
+
+如果您还指定了该-strict选项,并且该jarsigner命令检测到严重警告,则会显示消息“jar 已验证,存在签名者错误”。
+
+jar 文件
+要签名的 JAR 文件。
+
+如果您还指定了该-strict选项,并且该jarsigner命令检测到严重警告,则会显示消息“jar signed, with signer errors”。
+
+别名
+别名在由指定的密钥库-keystore或默认密钥库中定义。
+描述
+该jarsigner工具有两个目的:
+
+签署 Java 存档 (JAR) 文件。
+
+验证签名 JAR 文件的签名和完整性。
+
+JAR 功能可以将类文件、图像、声音和其他数字数据打包在一个文件中,以便更快、更轻松地分发。一个名为的工具jar使开发人员能够生成 JAR 文件。(从技术上讲,任何 ZIP 文件也可以被视为 JAR 文件,尽管当由jar命令创建或由命令处理时jarsigner,JAR 文件也包含一个META-INF/MANIFEST.MF文件。)
+
+数字签名是从一些数据(被签名的数据)和实体(个人、公司等)的私钥计算出来的一串位。与手写签名类似,数字签名具有许多有用的特征:
+
+它的真实性可以通过计算来验证,该计算使用与用于生成签名的私钥相对应的公钥。
+
+它不能被伪造,假设私钥是保密的。
+
+它是签名数据的函数,因此也不能声称是其他数据的签名。
+
+签名的数据不能更改。如果数据更改,则无法验证签名的真实性。
+
+要为文件生成实体的签名,实体必须首先具有与其关联的公钥/私钥对和一个或多个验证其公钥的证书。证书是来自一个实体的数字签名声明,表明另一个实体的公钥具有特定值。
+
+该jarsigner命令使用密钥库中的密钥和证书信息为 JAR 文件生成数字签名。密钥库是私钥及其关联的 X.509 证书链的数据库,用于验证相应的公钥。该keytool命令用于创建和管理密钥库。
+
+该jarsigner命令使用实体的私钥来生成签名。签名的 JAR 文件包含来自密钥库的证书副本,其中包含与用于签署文件的私钥相对应的公钥的证书副本。该jarsigner命令可以使用其中的证书(在其签名块文件中)验证已签名 JAR 文件的数字签名。
+
+该jarsigner命令可以生成包含时间戳的签名,使系统或部署者能够在签名证书仍然有效时检查 JAR 文件是否已签名。
+
+此外,API 允许应用程序获取时间戳信息。
+
+此时,该jarsigner命令只能对由该jar命令创建的 JAR 文件或 zip 文件进行签名。JAR 文件与 zip 文件相同,但它们也有一个META-INF/MANIFEST.MF文件。当命令对 zip 文件进行签名META-INF/MANIFEST.MF时,将创建一个文件。jarsigner
+
+默认jarsigner命令行为是签署 JAR 或 zip 文件。使用该-verify选项来验证签名的 JAR 文件。
+
+该jarsigner命令还尝试在签名或验证后验证签名者的证书。-revCheck在验证期间,当指定选项时,它会检查签名者证书链中每个证书的吊销状态。如果存在验证错误或任何其他问题,该命令会生成警告消息。如果您指定该-strict选项,则该命令将严重警告视为错误。请参阅错误和警告。
+
+密钥库别名
+使用唯一别名访问所有密钥库实体。
+
+当您使用该jarsigner命令对 JAR 文件进行签名时,您必须为包含生成签名所需的私钥的密钥库条目指定别名。如果未指定输出文件,它将用签名的 JAR 文件覆盖原始 JAR 文件。
+
+密钥库受密码保护,因此必须指定存储密码。当您未在命令行上指定它时,系统会提示您输入它。同样,私钥在keystore中是有密码保护的,所以必须指定私钥的密码,在命令行中不指定密码时会提示输入密码,与store不一样密码。
+
+密钥库位置
+该jarsigner命令有一个-keystore用于指定要使用的密钥库的 URL 的选项。密钥库默认存储在.keystore用户主目录中命名的文件中,由user.home系统属性确定。
+
+Linux 和 OS X: user.home默认为用户的主目录。
+
+来自选项的输入流-keystore被传递给KeyStore.load方法。如果NONE指定为 URL,则将一个空流传递给该KeyStore.load方法。NONE当类不是基于文件的时候应该指定KeyStore,例如,当它驻留在硬件令牌设备上时。
+
+密钥库实现
+包中提供的KeyStore类提供java.security了许多定义良好的接口来访问和修改密钥库中的信息。您可以有多个不同的具体实现,其中每个实现都针对特定类型的密钥库。
+
+目前,有两个使用密钥库实现的命令行工具(keytool和jarsigner)。
+
+默认的密钥库实现是PKCS12. 这是一个基于 RSA PKCS12 个人信息交换语法标准的跨平台密钥库。该标准主要用于存储或传输用户的私钥、证书和其他机密。Oracle 提供了另一个内置实现。它将密钥库实现为具有专有密钥库类型(格式)的文件,名为JKS. 它使用单独的密码保护每个私钥,并使用(可能不同的)密码保护整个密钥库的完整性。
+
+Keystore 实现是基于提供者的,这意味着KeyStore类提供的应用程序接口是根据服务提供者接口 (SPI) 实现的。也有一个相应的抽象KeystoreSpi类,java.security package它定义了提供者必须实现的服务提供者接口方法。术语提供者是指一个包或一组包,它们提供 Java 安全 API 可以访问的服务子集的具体实现。要提供密钥库实现,客户端必须实现提供者并提供KeystoreSpi子类实现,如如何在 Java 密码体系结构中实现提供者中所述。
+
+getInstance应用程序可以使用类中的工厂方法从不同的提供者中选择不同类型的密钥库实现KeyStore。密钥库类型定义了密钥库信息的存储和数据格式,以及用于保护密钥库中的私钥和密钥库本身完整性的算法。不同类型的密钥库实现不兼容。
+
+这些jarsigner命令可以从可以使用 URL 指定的任何位置读取基于文件的密钥库。此外,这些命令可以读取非基于文件的密钥库,例如 Windows 上的 MSCAPI 和所有平台上的 PKCS11 提供的密钥库。
+
+对于jarsignerand命令,您可以使用该选项keytool在命令行中指定密钥库类型。-storetype
+
+如果您没有明确指定密钥库类型,则工具会根据keystore.type安全属性文件中指定的属性值选择密钥库实现。安全属性文件称为java.security,它位于 JDK 安全属性目录中,java.home/conf/security.
+
+每个工具获取该keystore.type值,然后检查所有已安装的提供程序,直到找到实现该类型密钥库的提供程序。然后它使用来自该提供者的密钥库实现。
+
+该类KeyStore定义了一个名为的静态方法getDefaultType,该方法允许应用程序检索keystore.type属性的值。以下代码行创建keystore.type属性中指定的默认密钥库类型的实例:
+
+KeyStore keyStore = KeyStore.getInstance(KeyStore.getDefaultType());
+
+默认密钥库类型是pkcs12,它是基于 RSA PKCS12 个人信息交换语法标准的跨平台密钥库。这由安全属性文件中的以下行指定:
+
+keystore.type=pkcs12
+
+大小写在密钥库类型指定中无关紧要。例如,JKS与 相同jks。
+
+要让工具使用默认以外的密钥库实现,您可以更改该行以指定不同的密钥库类型。例如,如果您想使用 Oracle 的jks密钥库实现,则将该行更改为以下内容:
+
+keystore.type=jks
+
+支持的算法
+默认情况下,该jarsigner命令使用以下算法之一对 JAR 文件进行签名,并根据私钥的类型和大小阻止文件扩展名:
+
+关键	密钥大小	默认信号	块文件扩展名
+动态搜索广告	任何尺寸	带有 DSA 的 SHA256	.DSA
+RSA	<= 3072	SHA256 和 RSA	.RSA
+<= 7680	SHA3​​84 和 RSA	
+> 7680	SHA512 和 RSA	
+欧共体	<384	SHA256 和 ECDSA	.EC
+<512	SHA3​​84 和 ECDSA	
+= 512	SHA512 和 ECDSA	
+RSASSA-PSS	<= 3072	RSASSA-PSS(使用 SHA-256)	.RSA
+<= 7680	RSASSA-PSS(使用 SHA-384)	
+> 7680	RSASSA-PSS(使用 SHA-512)	
+EDDSA	255	Ed25519	.EC
+448	Ed448	
+如果 RSASSA-PSS 密钥使用参数编码,则 jarsigner 将在签名中使用相同的参数。否则,jarsigner 将使用由上表中指定的密钥大小确定的参数。例如,3072 位 RSASSA-PSS 密钥将使用 RSASSA-PSS 作为签名算法,使用 SHA-256 作为散列和 MGF1 算法。
+可以使用该-sigalg选项覆盖这些默认签名算法。
+
+该jarsigner命令使用jdk.jar.disabledAlgorithms和jdk.security.legacyAlgorithms安全属性来确定哪些算法被视为安全风险。如果 JAR 文件使用任何禁用的算法进行签名,它将被视为未签名的 JAR 文件。如果 JAR 文件使用任何旧算法进行签名,它将被视为带有信息警告的签名,以通知用户旧算法将在未来的更新中被禁用。有关详细的验证输出,请包含-J-Djava.security.debug=jar. 和安全属性在文件中定义jdk.jar.disabledAlgorithms(位于 JDK 的目录中)。jdk.security.legacyAlgorithmsjava.security$JAVA_HOME/conf/security
+
+笔记:
+
+为了提高开箱即用的安全性,每个 JDK 版本都会定期将默认密钥大小和签名算法名称更新为更强的值。如果与旧版本 JDK 的互操作性很重要,请确保这些版本支持默认值,或者使用-sigalg选项覆盖默认值,风险自负。
+
+签名的 JAR 文件
+当该jarsigner命令用于对 JAR 文件进行签名时,输出签名的 JAR 文件与输入 JAR 文件完全相同,只是它在 META-INF 目录中放置了两个附加文件:
+
+带有.SF扩展名的签名文件
+
+带有 、 或 扩展名的.DSA签名.RSA块.EC文件
+
+这两个文件的基本文件名来自该-sigfile选项的值。例如,当该选项是时-sigfile MKSIGN,文件名为MKSIGN.SFAND MKSIGN.RSA。在本文档中,我们假设签名者始终使用 RSA 密钥。
+
+如果-sigfile命令行上没有出现任何选项,那么.SF签名块文件的基本文件名是命令行上指定的别名的前 8 个字符,全部转换为大写。如果别名少于 8 个字符,则使用完整别名。如果别名包含签名文件名中不允许的任何字符,则每个此类字符都将转换为下划线 (_) 字符以形成文件名。有效字符包括字母、数字、下划线和连字符。
+
+签名文件
+签名文件 ( .SFfile) 看起来类似于清单文件,当使用jarsigner命令对文件进行签名时,该文件始终包含在 JAR 文件中。对于 JAR 文件中包含的每个源文件,该.SF文件有两行,例如在清单文件中,列出以下内容:
+
+文件名
+
+摘要算法的名称 (SHA)
+
+SHA 摘要值
+
+笔记:
+
+摘要算法 (SHA) 的名称和 SHA 摘要值位于同一行。
+
+在清单文件中,每个源文件的 SHA 摘要值是源文件中二进制数据的摘要(哈希)。在该.SF文件中,指定源文件的摘要值是源文件清单文件中两行的哈希值。
+
+默认情况下,签名文件包含一个带有整个清单文件散列的标头。标头还包含清单标头的哈希。标头的存在使验证优化成为可能。请参阅JAR 文件验证。
+
+签名块文件
+文件被签名并且.SF签名被放置在签名块文件中。该文件还包含(在其中编码)来自密钥库的证书或证书链,该证书或证书链验证与用于签名的私钥相对应的公钥。该文件具有扩展名.DSA、.RSA或.EC,具体取决于所使用的密钥算法。请参阅支持的算法中的表格。
+
+签名时间戳
+与以下选项一起使用的jarsigner命令会在对 JAR 文件进行签名时生成并存储签名时间戳:
+
+-tsa 网址
+
+-tsacert 别名
+
+-tsapolicyid 保单编号
+
+-tsadigestalg 算法
+
+请参阅jarsigner 的选项。
+
+JAR 文件验证
+当签名有效并且生成签名时 JAR 文件中的所有文件从那时起都没有更改时,就会成功验证 JAR 文件。JAR 文件验证涉及以下步骤:
+
+验证文件的签名.SF。
+
+验证确保每个签名块文件中存储的签名是使用与签名块文件中也出现的证书(或证书链)的公钥对应的私钥生成的。它还确保签名是相应签名 ( .SF) 文件的有效签名,因此.SF文件没有被篡改。
+
+验证文件中每个条目中列出的摘要.SF与清单中的每个相应部分。
+
+默认情况下,该.SF文件包含一个标头,该标头包含整个清单文件的哈希值。当标头存在时,验证可以检查标头中的哈希是否与清单文件的哈希匹配。如果存在匹配,则验证进行到下一步。
+
+如果不匹配,则需要进行不太优化的验证,以确保文件中每个源文件信息部分.SF的哈希值等于清单文件中其对应部分的哈希值。请参阅签名文件。
+
+存储在.SF文件头中的清单文件的哈希值可能不等于当前清单文件的哈希值的一个原因是,在生成jar签名和文件之后,一个或多个文件被添加到 JAR 文件(使用该工具).SF。当该jar工具用于添加文件时,清单文件会通过为新文件添加部分来更改,但.SF文件不会更改。当生成签名时 JAR 文件中的所有文件自那时起都没有更改时,仍然认为验证成功。当文件的非标题部分的.SF哈希值等于清单文件中相应部分的哈希值时,就会发生这种情况。
+
+读取 JAR 文件中具有文件条目的每个.SF文件。读取时,计算文件的摘要并将结果与​​清单部分中此文件的摘要进行比较。摘要应该相同,否则验证失败。
+
+如果在验证过程中出现任何严重的验证失败,则停止该过程并抛出安全异常。该jarsigner命令捕获并显示异常。
+
+检查禁用的算法使用情况。请参阅支持的算法。
+
+笔记:
+
+您应该阅读任何附加警告(或错误,如果您指定了-strict选项)以及证书的内容(通过指定-verboseand-certs选项)以确定签名是否可以信任。
+
+JAR 文件的多重签名
+一个 JAR 文件可以由多个人签名,方法是jarsigner对文件多次运行该命令并每次为不同的人指定别名,如下所示:
+
+jarsigner myBundle.jar susan
+jarsigner myBundle.jar kevin
+当一个 JAR 文件被多次.SF签名时,生成的 JAR 文件中有多个签名块文件,每个签名一对。在前面的示例中,输出 JAR 文件包含具有以下名称的文件:
+
+SUSAN.SF
+SUSAN.RSA
+KEVIN.SF
+KEVIN.RSA
+jarsigner 的选项
+以下部分描述了jarsigner. 请注意以下标准:
+
+所有选项名称前面都有一个连字符 (-)。
+
+可以按任何顺序提供选项。
+
+斜体或带下划线的项目(选项值)表示必须提供的实际值。
+
+、-storepass、-keypass、-sigfile、-sigalg、-digestalg和-signedjarTSA 相关选项仅在签署 JAR 文件时相关；它们在验证签名的 JAR 文件时不相关。该-keystore选项与签署和验证 JAR 文件有关。此外,在签名和验证 JAR 文件时指定别名。
+
+-keystore 网址
+指定告诉密钥库位置的 URL。这默认为.keystore用户主目录中的文件,由user.home系统属性确定。
+
+签名时需要密钥库。当默认密钥库不存在或您想使用默认密钥库以外的密钥库时,您必须显式指定一个密钥库。
+
+验证时不需要密钥库,但如果指定了密钥库或存在默认值并且-verbose还指定了选项,则会输出有关用于验证 JAR 文件的任何证书是否包含在该密钥库中的附加信息。
+
+参数可以是文件名和路径规范而-keystore不是 URL,在这种情况下,它被视为与文件相同: URL,例如,以下是等效的:
+
+-keystore 文件路径和名称
+
+-keystore file:文件路径和名称
+
+java.security如果在安全属性文件(位于 JDK 的目录中)中配置了 Sun PKCS #11 提供程序$JAVA_HOME/conf/security,则keytool和jarsigner工具可以通过指定以下选项对 PKCS #11 令牌进行操作:
+
+-keystore NONE -storetype PKCS11
+
+例如,以下命令列出了配置的 PKCS#11 令牌的内容:
+
+keytool -keystore NONE -storetype PKCS11 -list
+
+-storepass[ :env| :file]论点
+指定访问密钥库所需的密码。这仅在签署(而不是验证)JAR 文件时才需要。在这种情况下,如果-storepass命令行中未提供选项,则会提示用户输入密码。
+
+如果未指定修饰符envor file,则密码的值为argument。否则,密码检索如下:
+
+env: 从名为argument的环境变量中检索密码。
+
+file: 从名为参数的文件中检索密码。
+
+笔记:
+
+不应在命令行或脚本中指定密码,除非用于测试目的,或者您使用的是安全系统。
+
+-storetype 尺码类型
+指定要实例化的密钥库的类型。默认密钥库类型是keystore.type在安全属性文件中指定为属性getDefaultType值的类型,由java.security.KeyStore.
+
+也可以使用该-storepass选项指定 PKCS #11 令牌的 PIN。如果未指定,则keytoolandjarsigner命令提示输入令牌 PIN。如果令牌具有受保护的身份验证路径(例如专用 PIN 键盘或生物识别阅读器),则-protected必须指定该选项,并且不能指定密码选项。
+
+-keypass[ :env| :file]参数 -certchain 文件
+指定用于保护由命令行上指定的别名寻址的密钥库条目的私钥的密码。jarsigner用于签署 JAR 文件时需要密码。如果命令行上未提供密码,并且所需密码与存储密码不同,则会提示用户输入密码。
+
+如果未指定修饰符envor file,则密码的值为argument。否则,密码检索如下:
+
+env: 从名为argument的环境变量中检索密码。
+
+file: 从名为参数的文件中检索密码。
+
+笔记:
+
+不应在命令行或脚本中指定密码,除非用于测试目的,或者您使用的是安全系统。
+
+-certchain 文件
+指定当与由命令行上指定的别名寻址的密钥库条目的私钥关联的证书链不完整时要使用的证书链。当密钥库位于没有足够容量容纳完整证书链的硬件令牌上时,可能会发生这种情况。该文件可以是一系列连接的 X.509 证书,或单个 PKCS#7 格式的数据块,可以是二进制编码格式,也可以是Internet RFC 1421 证书编码标准定义的可打印编码格式(也称为 Base64 编码)。
+-sigfile 文件
+指定要用于生成的.SF和签名块文件的基本文件名。例如,如果 file 是DUKESIGN,则生成的.SF签名块文件名为DUKESIGN.SFand DUKESIGN.RSA,并放置在META-INF已签名的 JAR 文件的目录中。
+
+文件中的字符必须来自集合a-zA-Z0-9_-。只允许使用字母、数字、下划线和连字符。.SF对于签名块文件名,所有小写​​字符都将转换为大写。
+
+如果-sigfile命令行上没有出现任何选项,则.SF签名块文件和签名块文件的基本文件名是命令行上指定的别名的前 8 个字符,全部转换为大写。如果别名少于 8 个字符,则使用完整别名。如果别名包含在签名文件名中无效的任何字符,则每个此类字符都将转换为下划线 (_) 字符以形成文件名。
+
+-signedjar 文件
+指定签名 JAR 文件的名称。
+-digestalg 算法
+指定在对 JAR 文件的条目进行摘要时使用的消息摘要算法的名称。
+
+有关标准消息摘要算法名称的列表,请参阅 Java 安全标准算法名称。
+
+如果未指定此选项,则SHA256使用 then。必须有一个静态安装的提供程序提供指定算法的实现,或者用户必须使用-addprovideror-providerClass选项指定一个提供程序；否则,该命令将不会成功。
+
+-sigalg 算法
+指定用于对 JAR 文件进行签名的签名算法的名称。
+
+此算法必须与用于签署 JAR 文件的私钥兼容。如果未指定此选项,则使用与私钥匹配的默认算法,如支持的算法部分中所述。必须有一个静态安装的提供程序来提供指定算法的实现,或者您必须使用-addprovideror-providerClass选项指定一个提供程序；否则,该命令不会成功。
+
+有关标准消息摘要算法名称的列表,请参阅 Java 安全标准算法名称。
+
+-verify
+验证签名的 JAR 文件。
+-verbose[:子选项]
+当该-verbose选项出现在命令行上时,表示jarsigner在签名或验证时使用详细模式,使用子选项确定显示多少信息。这会导致 ,这会导致jarsigner输出有关 JAR 签名或验证进度的额外信息。子选项可以all是、grouped或summary。
+
+如果-certs还指定了该选项,则默认模式(或子选项all)显示正在处理的每个条目,然后显示 JAR 文件的每个签名者的证书信息。
+
+如果指定了-certs和-verbose:grouped子选项,则具有相同签名者信息的条目将与其证书信息一起分组并显示。
+
+如果指定-certs和-verbose:summary子选项,则具有相同签名者信息的条目将与其证书信息一起分组并显示。
+
+每个条目的详细信息都汇总并显示为一个(或更多)条目。请参阅验证签名 JAR 文件的示例和使用证书信息进行验证的示例。
+
+-certs
+如果该选项与和选项-certs一起出现在命令行上,则输出包括 JAR 文件的每个签名者的证书信息。此信息包括证明签名者公钥的证书类型的名称(存储在签名块文件中),如果证书是 X.509 证书( 的实例),则包括签名者的可分辨名称。-verify-verbosejava.security.cert.X509Certificate
+
+还会检查密钥库。如果在命令行上未指定密钥库值,则检查默认密钥库文件(如果有)。如果签名者的公钥证书与密钥库中的条目匹配,则该签名者的密钥库条目的别名将显示在括号中。
+
+-revCheck
+此选项在签署或验证 JAR 文件时启用证书的吊销检查。如果在命令行上指定了该选项,该jarsigner命令会尝试建立网络连接以获取 OCSP 响应和 CRL 。-revCheck请注意,除非指定此选项,否则不会启用吊销检查。
+-tsa 网址
+如果-tsa http://example.tsa.url在对 JAR 文件进行签名时出现在命令行上,则会为签名生成时间戳。URLhttp://example.tsa.url标识时间戳权威 (TSA) 的位置,并覆盖使用该-tsacert选项找到的任何 URL。该-tsa选项不要求密钥库中存在 TSA 公钥证书。
+
+要生成时间戳,jarsigner请使用 RFC 3161 中定义的时间戳协议 (TSP) 与 TSA 进行通信。成功后,TSA 返回的时间戳令牌与签名一起存储在签名块文件中。
+
+-tsacert 别名
+对 JAR 文件进行签名时,当命令行出现-tsacert 别名时,会为签名生成时间戳。别名标识有效的密钥库中的 TSA 公钥证书。检查条目的证书以查找包含标识 TSA 位置的 URL 的主题信息访问扩展。
+
+-tsacert使用该选项时,密钥库中必须存在 TSA 公钥证书。
+
+-tsapolicyid 保单编号
+指定标识要发送到 TSA 服务器的策略 ID 的对象标识符 (OID)。如果未指定此选项,则不发送策略 ID,TSA 服务器将选择默认策略 ID。
+
+对象标识符由 X.696 定义,它是 ITU 电信标准化部门 (ITU-T) 标准。这些标识符通常是以句点分隔的非负数集1.2.3.4,例如 。
+
+-tsadigestalg 算法
+指定用于生成要发送到 TSA 服务器的消息印记的消息摘要算法。如果未指定此选项,将使用 SHA-256。
+
+请参阅支持的算法。
+
+有关标准消息摘要算法名称的列表,请参阅 Java 安全标准算法名称。
+
+-internalsf
+过去,在对 JAR 文件进行签名时生成的签名块文件包括文件的完整编码副本.SF(签名文件)也生成。此行为已更改。为了减小输出 JAR 文件的整体大小,默认情况下签名块文件不再包含该文件的副本.SF。如果-internalsf出现在命令行上,则使用旧行为。此选项对测试很有用。在实践中,不要使用该-internalsf选项,因为它会产生更高的开销。
+-sectionsonly
+如果该-sectionsonly选项出现在命令行上,则在.SF对 JAR 文件进行签名时生成的文件(签名文件)不包含包含整个清单文件哈希的标头。它仅包含与 JAR 文件中包含的每个单独源文件相关的信息和哈希值。请参阅签名文件。
+
+默认情况下,添加此标头作为优化。当 header 存在时,每当验证 JAR 文件时,验证可以首先检查 header 中的 hash 是否与整个 manifest 文件的 hash 匹配。当存在匹配时,验证进行到下一步。当不匹配时,需要做一个不太优化的验证,以确保文件中每个源文件信息部分.SF的哈希值等于清单文件中其对应部分的哈希值。请参阅JAR 文件验证。
+
+该-sectionsonly选项主要用于测试。除了测试之外,它不应该用于其他用途,因为使用它会产生更高的开销。
+
+-protected
+值可以是true或false。指定true何时必须通过受保护的身份验证路径(例如专用 PIN 阅读器)指定密码。
+-providerName 提供者名称
+java.security如果在安全属性文件中配置了多个提供程序,那么您可以使用该-providerName选项来定位特定的提供程序实例。此选项的参数是提供者的名称。
+
+对于 Oracle PKCS #11 提供者,提供者名称的格式为SunPKCS11-TokenName,其中TokenName是提供者实例已配置的名称后缀,如配置属性表中所述。例如,以下命令列出PKCS #11名称为 suffix 的密钥库提供程序实例的内容SmartCard:
+
+jarsigner -keystore NONE -storetype PKCS11 -providerName SunPKCS11-SmartCard -list
+
+-addprovider 名称[ -providerArg arg ]
+按名称(例如 SunPKCS11)和可选的配置参数添加安全提供程序。安全提供者的值是在模块中定义的安全提供者的名称。
+
+与-providerArg ConfigFilePath选项一起使用时,keytool和jarsigner工具会动态安装提供程序并ConfigFilePath用于令牌配置文件的路径。以下示例显示了PKCS #11在安全属性文件中未配置 Oracle PKCS #11 提供程序时列出密钥库的命令。
+
+jarsigner -keystore NONE -storetype PKCS11 -addprovider SunPKCS11 -providerArg /mydir1/mydir2/token.config
+
+-providerClass 提供者类名[ -providerArg arg ]
+java.security当服务提供者未在安全属性文件中列出时,用于指定加密服务提供者的主类文件的名称。通过完全限定的类名和可选的配置参数添加安全提供程序。
+
+笔记:
+
+加载 PKCS11 的首选方法是使用模块。见-addprovider。
+
+-Jjava选项
+将指定的javaoption字符串直接传递给 Java 解释器。该jarsigner命令是解释器的包装器。此选项不应包含任何空格。它对于调整执行环境或内存使用很有用。有关可能的解释器选项的列表,请在命令行中 键入java -h或。java -X
+-strict
+在签名或验证过程中,该命令可能会发出警告消息。如果您指定此选项,则该工具的退出代码会反映此命令发现的严重警告消息。请参阅错误和警告。
+-conf 网址
+指定预配置的选项文件。有关详细信息,请阅读keytool 文档。支持的属性键是“jarsigner.all”用于所有操作,“jarsigner.sign”用于签名,“jarsigner.verify”用于验证。jarsigner不能在此文件中设置包括 JAR 文件名和别名在内的参数。
+不推荐使用的选项
+以下jarsigner选项自 JDK 9 起已弃用,可能会在未来的 JDK 版本中删除。
+
+-altsigner 班级
+此选项指定替代签名机制。全限定类名标识扩展com.sun.jarsigner.ContentSigner抽象类的类文件。此类文件的路径由-altsignerpath选项定义。如果-altsigner使用该选项,则该jarsigner命令使用指定类提供的签名机制。否则,该jarsigner命令将使用其默认签名机制。
+
+例如,要使用名为 的类提供的签名机制com.sun.sun.jarsigner.AuthSigner,请使用jarsigner选项-altsigner com.sun.jarsigner.AuthSigner。
+
+-altsignerpath 类路径列表
+指定类文件及其依赖的任何 JAR 文件的路径。类文件名由-altsigner选项指定。如果类文件在 JAR 文件中,则此选项指定该 JAR 文件的路径。
+
+可以指定绝对路径或相对于当前目录的路径。如果classpathlist包含多个路径或 JAR 文件,那么它们应该用以下分隔:
+
+:Linux 和 macOS 上的冒号 ( )
+
+;Windows 上的分号 ( )
+
+当类已经在搜索路径中时,此选项不是必需的。
+
+以下示例显示如何指定包含类文件的 JAR 文件的路径。包含 JAR 文件名。
+
+-altsignerpath /home/user/lib/authsigner.jar
+
+以下示例显示如何指定包含类文件的 JAR 文件的路径。JAR 文件名被省略。
+
+-altsignerpath /home/user/classes/com/sun/tools/jarsigner/
+
+错误和警告
+在签名或验证过程中,该jarsigner命令可能会发出各种错误或警告。
+
+如果失败,则jarsigner命令以代码 1 退出。如果没有失败,但有一个或多个严重警告,则在未指定选项jarsigner时命令以代码 0退出,或者以指定时的警告代码。如果只有信息警告或根本没有警告,则该命令始终以代码 0 退出。-strict-strict
+
+例如,如果用于对条目进行签名的证书已过期并且具有不允许其对文件进行签名的 KeyUsage 扩展名,则在指定选项jarsigner时该命令将退出并返回代码 12 (=4+8) -strict。
+
+注意:退出代码被重复使用,因为只有 0 到 255 之间的值在 Linux 和 OS X 上是合法的。
+
+以下部分描述了该jarsigner命令可能发出的错误和警告的名称、代码和描述。
+
+失败
+命令失败的原因jarsigner包括(但不限于)命令行解析错误、无法找到对 JAR 文件签名的密钥对或签名 JAR 验证失败。
+
+失败
+代码 1. 签名或验证失败。
+严重警告
+笔记:
+
+-strict如果您指定该选项,则会将严重警告报告为错误。
+
+jarsigner该命令发出严重警告的原因包括用于签署 JAR 文件的证书有错误或签署的 JAR 文件有其他问题。
+
+已过期证书
+代码 4。此 JAR 包含签名者证书已过期的条目。
+已过期TsaCert
+代码 4。时间戳已过期。
+notYetValidCert
+代码 4。此 JAR 包含签名者证书尚未生效的条目。
+链未验证
+代码 4。此 JAR 包含未验证证书链的条目。
+tsaChainNotValidated
+代码 64。时间戳无效。
+签名者自签名
+代码 4。此 JAR 包含其签名者证书是自签名的条目。
+禁用Alg
+代码 4. 使用的算法被认为存在安全风险并被禁用。
+badKeyUsage
+代码 8。此 JAR 包含其签名者证书的 KeyUsage 扩展不允许代码签名的条目。
+badExtendedKeyUsage
+代码 8。此 JAR 包含其签名者证书的 ExtendedKeyUsage 扩展不允许代码签名的条目。
+badNetscapeCertType
+代码 8。此 JAR 包含签名者证书的 NetscapeCertType 扩展不允许代码签名的条目。
+hasUnsignedEntry
+代码 16。此 JAR 包含未经完整性检查的未签名条目。
+notSignedByAlias
+代码 32。此 JAR 包含未由指定别名签名的签名条目。
+别名NotInStore
+代码 32。此 JAR 包含未由此密钥库中的别名签名的签名条目。
+tsaChainNotValidated
+代码 64。此 JAR 包含其 TSA 证书链无效的条目。
+信息警告
+信息性警告包括那些不是错误但被视为不良做法的警告。他们没有密码。
+
+检测到的额外属性
+在签名或验证 JAR 文件期间检测 POSIX 文件权限和/或符号链接属性。该jarsigner工具将这些属性保留在新签名的文件中,但会警告这些属性未签名且不受签名保护。
+hasExpiringCert
+此 JAR 包含签名者证书在六个月内到期的条目。
+已过期 TsaCert
+时间戳将在一年内到期YYYY-MM-DD。
+遗留算法
+使用的算法被认为存在安全风险,但未被禁用。
+无时间戳
+此 JAR 包含不包含时间戳的签名。如果没有时间戳,用户可能无法在签名者证书的到期日期 ( YYYY-MM-DD) 或任何未来的撤销日期之后验证此 JAR 文件。
+签署 JAR 文件的示例
+使用以下命令使用其密钥库别名在目录中指定的密钥库中的用户的私钥进行签名,并将bundle.jar签名的 JAR 文件命名为:janemystoreworkingsbundle.jar
+
+jarsigner -keystore /working/mystore -storepass keystore_password -keypass private_key_password -signedjar sbundle.jar bundle.jar jane
+
+上一个命令中没有-sigfile指定,因此.SF要放置在签名 JAR 文件中的生成和签名块文件具有基于别名的默认名称。它们被命名为JANE.SF和JANE.RSA。
+
+如果要提示您输入存储密码和私钥密码,则可以将前面的命令缩短为以下内容:
+
+jarsigner -keystore /working/mystore -signedjar sbundle.jar bundle.jar jane
+
+如果keystore是默认值keystore(.keystore在你的主目录中),那么你不需要指定 a keystore,如下所示:
+
+jarsigner -signedjar sbundle.jar bundle.jar jane
+
+如果您希望签名的 JAR 文件覆盖输入的 JAR 文件 ( bundle.jar),则无需指定-signedjar选项,如下所示:
+
+jarsigner bundle.jar jane
+
+验证签名 JAR 文件的示例
+要验证签名的 JAR 文件以确保签名有效且 JAR 文件未被篡改,请使用如下命令:
+
+jarsigner -verify ButtonDemo.jar
+
+验证成功后,jar verified显示 。否则,将显示错误消息。-verbose使用该选项时,您可以获得更多信息。使用jarsignerwith-verbose选项的示例如下:
+
+jarsigner -verify -verbose ButtonDemo.jar
+
+s       866 Tue Sep 12 20:08:48 EDT 2017 META-INF/MANIFEST.MF
+        825 Tue Sep 12 20:08:48 EDT 2017 META-INF/ORACLE_C.SF
+       7475 Tue Sep 12 20:08:48 EDT 2017 META-INF/ORACLE_C.RSA
+          0 Tue Sep 12 20:07:54 EDT 2017 META-INF/
+          0 Tue Sep 12 20:07:16 EDT 2017 components/
+          0 Tue Sep 12 20:07:16 EDT 2017 components/images/
+sm      523 Tue Sep 12 20:07:16 EDT 2017 components/ButtonDemo$1.class
+sm     3440 Tue Sep 12 20:07:16 EDT 2017 components/ButtonDemo.class
+sm     2346 Tue Sep 12 20:07:16 EDT 2017 components/ButtonDemo.jnlp
+sm      172 Tue Sep 12 20:07:16 EDT 2017 components/images/left.gif
+sm      235 Tue Sep 12 20:07:16 EDT 2017 components/images/middle.gif
+sm      172 Tue Sep 12 20:07:16 EDT 2017 components/images/right.gif
+
+  s = signature was verified
+  m = entry is listed in manifest
+  k = at least one certificate was found in keystore
+
+- Signed by "CN="Oracle America, Inc.", OU=Software Engineering, O="Oracle America, Inc.", L=Redwood City, ST=California, C=US"
+    Digest algorithm: SHA-256
+    Signature algorithm: SHA256withRSA, 2048-bit key
+  Timestamped by "CN=Symantec Time Stamping Services Signer - G4, O=Symantec Corporation, C=US" on Tue Sep 12 20:08:49 UTC 2017
+    Timestamp digest algorithm: SHA-1
+    Timestamp signature algorithm: SHA1withRSA, 2048-bit key
+
+jar verified.
+
+The signer certificate expired on 2018-02-01. However, the JAR will be valid until the timestamp expires on 2020-12-29.
+使用证书信息进行验证的示例
+如果您使用和选项指定-certs选项,则输出包括 JAR 文件的每个签名者的证书信息。该信息包括证书类型、签名者专有名称信息(当它是 X.509 证书时),以及括号中的签名者的密钥库别名(当 JAR 文件中的公钥证书与密钥库条目中的证书匹配时),例如:-verify-verbose
+
+jarsigner -keystore $JAVA_HOME/lib/security/cacerts -verify -verbose -certs ButtonDemo.jar
+
+s k     866 Tue Sep 12 20:08:48 EDT 2017 META-INF/MANIFEST.MF
+
+      >>> Signer
+      X.509, CN="Oracle America, Inc.", OU=Software Engineering, O="Oracle America, Inc.", L=Redwood City, ST=California, C=US
+      [certificate is valid from 2017-01-30, 7:00 PM to 2018-02-01, 6:59 PM]
+      X.509, CN=Symantec Class 3 SHA256 Code Signing CA, OU=Symantec Trust Network, O=Symantec Corporation, C=US
+      [certificate is valid from 2013-12-09, 7:00 PM to 2023-12-09, 6:59 PM]
+      X.509, CN=VeriSign Class 3 Public Primary Certification Authority - G5, OU="(c) 2006 VeriSign, Inc. - For authorized use only", OU=VeriSign Trust Network, O="VeriSign, Inc.", C=US (verisignclass3g5ca [jdk])
+      [trusted certificate]
+      >>> TSA
+      X.509, CN=Symantec Time Stamping Services Signer - G4, O=Symantec Corporation, C=US
+      [certificate is valid from 2012-10-17, 8:00 PM to 2020-12-29, 6:59 PM]
+      X.509, CN=Symantec Time Stamping Services CA - G2, O=Symantec Corporation, C=US
+      [certificate is valid from 2012-12-20, 7:00 PM to 2020-12-30, 6:59 PM]
+
+        825 Tue Sep 12 20:08:48 EDT 2017 META-INF/ORACLE_C.SF
+       7475 Tue Sep 12 20:08:48 EDT 2017 META-INF/ORACLE_C.RSA
+          0 Tue Sep 12 20:07:54 EDT 2017 META-INF/
+          0 Tue Sep 12 20:07:16 EDT 2017 components/
+          0 Tue Sep 12 20:07:16 EDT 2017 components/images/
+smk     523 Tue Sep 12 20:07:16 EDT 2017 components/ButtonDemo$1.class
+
+      [entry was signed on 2017-09-12, 4:08 PM]
+      >>> Signer
+      X.509, CN="Oracle America, Inc.", OU=Software Engineering, O="Oracle America, Inc.", L=Redwood City, ST=California, C=US
+      [certificate is valid from 2017-01-30, 7:00 PM to 2018-02-01, 6:59 PM]
+      X.509, CN=Symantec Class 3 SHA256 Code Signing CA, OU=Symantec Trust Network, O=Symantec Corporation, C=US
+      [certificate is valid from 2013-12-09, 7:00 PM to 2023-12-09, 6:59 PM]
+      X.509, CN=VeriSign Class 3 Public Primary Certification Authority - G5, OU="(c) 2006 VeriSign, Inc. - For authorized use only", OU=VeriSign Trust Network, O="VeriSign, Inc.", C=US (verisignclass3g5ca [jdk])
+      [trusted certificate]
+      >>> TSA
+      X.509, CN=Symantec Time Stamping Services Signer - G4, O=Symantec Corporation, C=US
+      [certificate is valid from 2012-10-17, 8:00 PM to 2020-12-29, 6:59 PM]
+      X.509, CN=Symantec Time Stamping Services CA - G2, O=Symantec Corporation, C=US
+      [certificate is valid from 2012-12-20, 7:00 PM to 2020-12-30, 6:59 PM]
+
+smk    3440 Tue Sep 12 20:07:16 EDT 2017 components/ButtonDemo.class
+...
+smk    2346 Tue Sep 12 20:07:16 EDT 2017 components/ButtonDemo.jnlp
+...
+smk     172 Tue Sep 12 20:07:16 EDT 2017 components/images/left.gif
+...
+smk     235 Tue Sep 12 20:07:16 EDT 2017 components/images/middle.gif
+...
+smk     172 Tue Sep 12 20:07:16 EDT 2017 components/images/right.gif
+...
+
+  s = signature was verified
+  m = entry is listed in manifest
+  k = at least one certificate was found in keystore
+
+- Signed by "CN="Oracle America, Inc.", OU=Software Engineering, O="Oracle America, Inc.", L=Redwood City, ST=California, C=US"
+    Digest algorithm: SHA-256
+    Signature algorithm: SHA256withRSA, 2048-bit key
+  Timestamped by "CN=Symantec Time Stamping Services Signer - G4, O=Symantec Corporation, C=US" on Tue Sep 12 20:08:49 UTC 2017
+    Timestamp digest algorithm: SHA-1
+    Timestamp signature algorithm: SHA1withRSA, 2048-bit key
+
+jar verified.
+
+The signer certificate expired on 2018-02-01. However, the JAR will be valid until the timestamp expires on 2020-12-29.
+如果签名者的证书不是 X.509 证书,则没有可分辨名称信息。在这种情况下,只显示证书类型和别名。例如,如果证书是 PGP 证书,并且别名是bob,那么您将获得:PGP, (bob).
+
+版权所有© 1993, 2021,Oracle 和/或其附属公司,500 Oracle Parkway, Redwood Shores, CA 94065 USA。
+版权所有。使用受许可条款和文档再分发政策的约束。

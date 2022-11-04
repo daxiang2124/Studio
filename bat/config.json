@@ -1,0 +1,23 @@
+{
+	"projectPath":{
+		"info":"vs code 项目路径配置",
+		"user_vs_path":{
+			"player_1":"C:/Users/用户A/AppData/Roaming/Code/User/globalStorage/alefragnani.project-manager/projects.json"
+		}
+	},
+
+	"platformList":["Item_1","Item_2"],
+
+	"Item_1":{
+		"info":"Item_1",
+		"project_list":{
+			"helloword":{"name":"helloword","path":"D:/git/helloword","androidType":"androidstudio","info":"练手项目"}
+			
+		}
+	},
+
+	"Item_2":{
+		"info":"Item_2",
+		"project_list":{}
+	},
+}

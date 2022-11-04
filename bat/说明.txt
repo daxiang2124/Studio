@@ -1,0 +1,33 @@
+{功能说明
+	games 游戏工具包(打包[大厅,子游戏] 同步文件)
+		main.bat 运行文件
+		项目维护表 config.json 注意:项目路径根据本地vscode配置决定,这个内容配置projectPath
+		python执行的文件 command.py
+		python解决不好解决问题 command.bat
+		注意:使用svn命令需要下载 https://www.visualsvn.com/downloads/
+	
+	key 生成keystore|jks秘钥文件
+	
+	build_aab_tool-master apk转aab
+	
+	androidstudio 签名渠道(资源加密后就不能打渠道包了)
+	eclipse 签名渠道
+
+	decompile 解析apk工具包
+		jadx-gui-1.2.0-no-jre-win.exe  查看apk内容(打开这个软件 把apk丢进去就可以看到里面的内容了)
+		反编译用到的工具
+			apktool:资源文件获取,可以提取出图片文件和布局文件进行使用查看  https://bitbucket.org/iBotPeaches/apktool/downloads/
+			dex2jar:将apk反编译成java源码（classes.dex转化成jar文件）
+			jd-gui:查看APK中classes.dex转化成出的jar文件,即源码文件 http://java-decompiler.github.io/
+			jadx:更强大的逆向工具 https://github.com/skylot/jadx
+
+	proguard 混淆文件
+	resource_enerator 垃圾资源工具包
+	
+	scatter 随机图片数量
+	
+	zip_disassembly 拆解合并zip
+	
+	...功能文件
+
+}

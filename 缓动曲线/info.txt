@@ -1,0 +1,88 @@
+
+{
+
+	简析缓动曲线 https://blog.csdn.net/wzf_taker/article/details/100660953?utm_medium=distribute.pc_relevant.none-task-blog-2~default~baidujs_baidulandingword~default-5-100660953-blog-47703061.t5_download_all&spm=1001.2101.3001.4242.4&utm_relevant_index=8
+
+	缓动公式小析 http://blog.cgsdream.org/2015/09/19/tweenslow-motion-formula/
+
+	有关EaseIn,EaseOut,EaseInOut https://blog.csdn.net/u014271114/article/details/47703061
+}
+
+前言
+    动效是用户体验很重要的一部分。随着设备性能提升和人们对于用户体验越来越高的追求,动效将会越来越重要。动效要遵循客观物理规律以及人的视觉经验,符合用户预期,让用户感觉自然,才能获得用户的喜爱。
+    
+    本文将从为什么探究缓动曲线、利用物理公式探究缓动曲线、常用缓动曲线、使用曲线拟合尝试剖析苹果ScrollView动效参数、使用线性插值高仿APP动效进行介绍。希望阅读后,本文能给你在制作动效时带来一点帮助。
+
+为什么探究缓动曲线
+    动画是源自现实世界的,人类早已习惯了一个变速运动的物理环境,一个简单的匀速动画会让人相对感觉不适。所以需要让我们的动效符合物理规律。缓动曲线表述动画变化的程度与时间的关系,常用于模拟物理世界中一些常见动作。而从动画体验来说,不同的缓动曲线会带给用户不同体验。一般为:匀速运动 < 变速运动 < 物理缓动。
+    
+    苹果官方的UIView提供了Linear,EaseIn,EaseOut,EaseInout还有bezier动画函数,然而只是局限于使用,知其然而不知其所以然。例如用ease-in来做小球从高处掉下的效果,这个加速效果没有遵循相关物理原理,使得出来的动画效果不太自然。
+
+
+利用物理公式探究缓动曲线
+    以下以弹簧动画为例,探究一下怎样模拟出这个效果。
+    ios9提供了CASpringAnimation类实现该效果,而web上就没有提供类似函数。但我们仍然可以通过以前学过的物理学和数学知识来做一下研究。
+       下面有一个弹簧块,假设它质量为1,在它不动的时候位置是x = 1,则拉伸时的距离就是x-1了:
+
+    将这比作一个动画,弹簧块在时间t时所处的位置x就可以看作动画曲线函数x = f(t)。如果我们求得这个函数公式,就可以模拟出这个动画效果了。对此,下图将通过物理学公式和数学知识进行探讨。
+
+
+可能很多人跟我一样,学了很久也没记住什么是EaseIn,什么是EaseOut…主要是怎么区分,今天终于记住了:
+首先在WPF中对Animation有EasingFunction标签,其具体的种类见后面的大图。而对每一种EasingFunction都有三种不同的缓动方式。
+
+1.EaseIn:即缓动发生在入口处,也就是刚开始的时候。
+2.EaseOut:即缓动发生在出口处,也就是结束之前。
+3.EaseInOut:就是两边都有缓动了。
+
+
+quarticEase,quinticEase,sineEase
+backEase,bounceEase,circleEase,cubicEase
+elasticEase,exponentialEase,powerEase,quadraticEase
+
+呈正弦变化
+	1)CCEaseSineIn:它的速度由慢至快。
+	2)CCEaseSineOut:速度是越来越慢。
+	3)CCEaseSineInOut:速度看起来就是由慢至快,再由快至慢的。
+
+呈指数级变化
+	4)CCEaseExponentialIn:速度由慢至快。
+	5)CCEaseExponentialOut:速度是越来越慢。
+	6)CCEaseExponentialInOut:速度看起来就是由慢至快,再由快至慢的。
+
+你可以设置运动的速率,甚至是在运动的过程中改变速率,具体用法详见其它博文,这里制作简介
+	7)CCEaseIn 动作由慢变快
+	8)CCEaseOut 动作由快变慢
+	9)CCEaseInOut 动作由慢变快再由快变慢
+
+下面几个可做action特效用给目标动作赋予回力
+	10)CCEaseBackIn:以目标动作起点位置作为回力点。
+	11)CCEaseBackOut:以目标动作终点位置作为回力点。
+	12)CCEaseBackInOut:且以目标动作起点和终点位置作为回力点。
+
+给目标动作赋予反弹力(想象一下将静止在地面上的篮球拍打起来的过程 cc.easebouncein)
+	13)CCEaseBounceIn:按照CCEaseBounceOut的定义镜像而来的。
+	14)CCEaseBounceOut:以目标动作结束位子开始反弹。
+	15)CCEaseBounceInOut:以目标动作起始与结束位子开始反弹。
+
+给目标动作赋予弹性
+	16)CCEaseElasticIn:以目标动作起点位子赋予弹性。
+	17)CCEaseElasticOut:以目标动作终点位子赋予弹性。
+	18)CCEaseElasticInOut:以目标动作起点和终点位子赋予弹性。
+
+code lua
+	local move = cc.MoveTo:create(0.2, cc.p(200,200))
+	local easeSineInAction = cc.EaseSineOut:create(move)--由快至慢
+	local sequence=cc.Sequence:create(easeSineInAction, cc.DelayTime:create(0.2), cc.CallFunc:create(function()end))
+
+
+
+
+
+
+
+
+
+
+
+
+
