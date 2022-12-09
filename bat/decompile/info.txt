@@ -1,0 +1,10 @@
+jadx-gui-1.2.0-no-jre-win.exe  查看apk内容(打开这个软件 把apk丢进去就可以看到里面的内容了)
+
+
+反编译用到的工具
+	apktool：资源文件获取，可以提取出图片文件和布局文件进行使用查看  https://bitbucket.org/iBotPeaches/apktool/downloads/
+	dex2jar：将apk反编译成java源码（classes.dex转化成jar文件）
+	jd-gui：查看APK中classes.dex转化成出的jar文件，即源码文件 http://java-decompiler.github.io/
+	jadx：更强大的逆向工具 https://github.com/skylot/jadx
+	
+

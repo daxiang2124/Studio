@@ -8,4 +8,14 @@
 	GLES3,
 	Metal,
 	WebGL,
-	WebGPU 
+	WebGPU  https://www.w3.org/TR/webgpu/
+
+
+
+Direct3D  是微软公司在Microsoft Windows操作系统上所开发的一套3D绘图编程接口
+Khronos Group 科纳斯组织（Khronos Group）是一个由成员资助的，专注于制定开放标准
+Metal (API) 是由苹果公司所开发的一个应用程序接口（API）
+OpenGL
+Vulkan (API)
+WebCL
+WebGL 是一种JavaScript API，用于在不使用插件的情况下在任何兼容的网页浏览器中呈现交互式2D和3D图形
